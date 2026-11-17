@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PXL·BOARD — доска для уроков</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 8'%3E%3Cg fill='%23ffffff'%3E%3Crect x='2' width='1' height='1'/%3E%3Crect x='8' width='1' height='1'/%3E%3Crect x='3' y='1' width='1' height='1'/%3E%3Crect x='7' y='1' width='1' height='1'/%3E%3Crect x='2' y='2' width='7' height='1'/%3E%3Crect x='1' y='3' width='2' height='1'/%3E%3Crect x='4' y='3' width='3' height='1'/%3E%3Crect x='8' y='3' width='2' height='1'/%3E%3Crect y='4' width='11' height='1'/%3E%3Crect y='5' width='1' height='1'/%3E%3Crect x='2' y='5' width='7' height='1'/%3E%3Crect x='10' y='5' width='1' height='1'/%3E%3Crect y='6' width='1' height='1'/%3E%3Crect x='2' y='6' width='1' height='1'/%3E%3Crect x='6' y='6' width='1' height='1'/%3E%3Crect x='8' y='6' width='1' height='1'/%3E%3Crect x='10' y='6' width='1' height='1'/%3E%3Crect x='3' y='7' width='2' height='1'/%3E%3Crect x='6' y='7' width='2' height='1'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +20,8 @@
     --text:#d8c7f7;
     --glow:0 0 3px rgba(255,255,255,.38), 0 0 7px rgba(255,255,255,.10);
   }
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+  button{touch-action:manipulation}
   html,body{height:100%;overflow:hidden}
   body{
     background:var(--bg);
@@ -66,7 +67,7 @@
 
   /* ---------- top bar ---------- */
   .topbar{
-    position:fixed;top:12px;left:12px;right:12px;z-index:20;
+    position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:20;
     display:flex;align-items:center;justify-content:space-between;
     padding:10px 16px;border-radius:18px;
   }
@@ -143,7 +144,7 @@
 
   /* ---------- left toolbar ---------- */
   .toolbar{
-    position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:20;
+    position:fixed;left:calc(12px + env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);z-index:20;
     display:flex;flex-direction:column;gap:8px;
     padding:10px 8px;border-radius:20px;
   }
@@ -289,7 +290,7 @@
 
   /* ---------- zoom bar ---------- */
   .zoombar{
-    position:fixed;bottom:16px;right:16px;z-index:20;
+    position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:calc(16px + env(safe-area-inset-right,0px));z-index:20;
     display:flex;align-items:center;gap:6px;padding:6px;border-radius:14px;
   }
   .zoombar .btn{min-width:32px;height:32px;border-radius:10px}
@@ -297,7 +298,7 @@
 
   /* ---------- hint pill ---------- */
   .hint{
-    position:fixed;bottom:16px;left:16px;z-index:20;
+    position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:calc(16px + env(safe-area-inset-left,0px));z-index:20;
     display:flex;align-items:center;gap:12px;
     padding:10px 14px;border-radius:14px;
     font-size:7px;color:var(--violet-bright);line-height:1.7;
@@ -465,9 +466,96 @@
 
   #popSave{top:64px;right:12px;width:280px;transform-origin:top right}
 
-  @media (max-width:640px){
+  /* ==================== RESPONSIVE ==================== */
+
+  /* тач-экраны: hover-эффекты «залипают» — отключаем */
+  @media (hover: none){
+    .btn:hover,.shape-btn:hover,.brush-btn:hover,.preset:hover,.board-row:hover{transform:none}
+  }
+
+  /* ---------- телефоны ---------- */
+  @media (max-width:700px){
     .logo small{display:none}
-    #popShapes,#popColor{left:64px;width:calc(100vw - 80px)}
+    .topbar{padding:8px 10px;border-radius:16px}
+    .top-actions{gap:6px}
+    .btn{min-width:36px;height:36px;padding:0 8px}
+    .logo b{font-size:11px}
+    .logo-icon{width:20px;height:15px}
+
+    /* панель инструментов — вниз по центру, под большой палец */
+    .toolbar{
+      left:50%;right:auto;top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px));
+      transform:translateX(-50%);
+      flex-direction:row;
+      padding:8px 10px;border-radius:18px;
+    }
+    .toolbar .sep{width:1px;height:auto;margin:4px 2px;background:linear-gradient(180deg,transparent,rgba(139,92,246,.35),transparent)}
+
+    /* поповеры — над панелью, на всю ширину */
+    #popShapes,#popBrush,#popColor{
+      left:12px;right:12px;top:auto;bottom:calc(72px + env(safe-area-inset-bottom,0px));
+      width:auto;margin-top:0;
+      max-height:calc(100dvh - 170px);overflow-y:auto;
+      transform-origin:center bottom;
+    }
+    .zoombar{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+    .hint{display:none}
+    .menu-card{padding:26px 18px}
+    .archive-list{max-height:45vh}
+  }
+
+  /* ---------- телефон в горизонтальной ориентации ---------- */
+  @media (max-height:500px) and (max-width:900px){
+    #popShapes,#popBrush,#popColor{
+      bottom:auto;top:calc(60px + env(safe-area-inset-top,0px));
+      left:calc(64px + env(safe-area-inset-left,0px));right:auto;
+      width:calc(100vw - 80px);transform-origin:top left;
+    }
+  }
+
+  /* ---------- очень узкие экраны ---------- */
+  @media (max-width:480px){
+    .logo b{display:none}
+    .topbar{left:8px;right:8px;padding:8px}
+    .btn{min-width:34px;height:34px;padding:0 7px;font-size:7px}
+    .btn svg{width:15px;height:15px}
+  }
+
+  /* ---------- электронные доски / большие тач-экраны ---------- */
+  @media (min-width:1700px) and (min-height:950px){
+    .topbar{padding:14px 22px;border-radius:22px}
+    .logo b{font-size:19px}
+    .logo small{font-size:11px}
+    .logo-icon{width:36px;height:27px}
+    .btn{min-width:52px;height:52px;padding:0 14px;border-radius:14px;font-size:11px}
+    .btn svg{width:24px;height:24px}
+    .toolbar{padding:14px 12px;border-radius:26px;gap:10px}
+    .zoombar{padding:8px;border-radius:18px}
+    .zoombar .btn{min-width:46px;height:46px}
+    #zoomLabel{font-size:12px;min-width:74px}
+    .hint{font-size:10px;padding:14px 18px}
+    .menu-card{width:min(560px,calc(100vw - 72px));padding:46px 38px;gap:16px;border-radius:32px}
+    .menu-title{font-size:18px}
+    .menu-sub{font-size:12px}
+    .menu-input{height:58px;font-size:12px;border-radius:16px}
+    .menu-btn{height:60px;font-size:12px}
+    .menu-invader{width:120px;height:87px}
+    .pop{padding:20px;border-radius:24px}
+    .pop-title{font-size:10px}
+    #popShapes{left:100px;width:340px}
+    #popBrush{left:100px;width:360px}
+    #popColor{left:100px;width:380px}
+    .shape-btn{height:56px;border-radius:14px}
+    .shape-btn svg{width:26px;height:26px}
+    .brush-btn{height:74px;border-radius:14px;font-size:8px}
+    .brush-btn svg{width:24px;height:24px}
+    .seg .btn{height:44px;font-size:10px}
+    .board-row{padding:14px 16px}
+    .board-row .b-name{font-size:12px}
+    .board-row .b-date{font-size:8px}
+    .archive-empty{font-size:11px}
+    .archive-list{max-height:50vh}
+    #toast{font-size:12px;padding:16px 22px}
   }
 </style>
 </head>
@@ -675,6 +763,7 @@ const I18N = {
     brush:'Кисть (B)', brushType:'ТИП КИСТИ', opacity:'ПРОЗРАЧНОСТЬ',
     b_pen:'ПЕРО', b_marker:'МАРКЕР', b_neon:'НЕОН', b_pencil:'КАРАНДАШ',
     hint:'ЛКМ — рисовать • Колесо — масштаб • Пробел — двигать доску',
+    hintTouch:'Палец — рисовать • Два пальца — масштаб и перетаскивание',
     menuT1:'доска для занятий', menuT2:'просто и со стилем',
     createBoard:'СОЗДАТЬ ДОСКУ', archive:'АРХИВ ДОСОК', boardNamePh:'Название доски',
     saveTitle:'СОХРАНИТЬ ДОСКУ', save:'СОХРАНИТЬ', saved:'Доска сохранена',
@@ -696,6 +785,7 @@ const I18N = {
     brush:'Brush (B)', brushType:'BRUSH TYPE', opacity:'OPACITY',
     b_pen:'PEN', b_marker:'MARKER', b_neon:'NEON', b_pencil:'PENCIL',
     hint:'LMB — draw • Wheel — zoom • Space — pan the board',
+    hintTouch:'Finger — draw • Two fingers — zoom & pan',
     menuT1:'lesson board', menuT2:'simple & stylish',
     createBoard:'CREATE BOARD', boardNamePh:'Board name',
     saveTitle:'SAVE BOARD', save:'SAVE', saved:'Board saved',
@@ -710,6 +800,7 @@ const I18N = {
 };
 let lang = localStorage.getItem('pxl_lang') || 'ru';
 const t = k => I18N[lang][k] || k;
+const IS_TOUCH = matchMedia('(hover: none), (pointer: coarse)').matches;
 
 function applyLang(){
   document.documentElement.lang = lang;
@@ -718,6 +809,8 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.getElementById('btnLang').textContent = lang === 'ru' ? 'EN' : 'RU';
+  const hintSpan = document.querySelector('#hint span[data-i18n]');
+  if (hintSpan) hintSpan.textContent = t(IS_TOUCH ? 'hintTouch' : 'hint');
 }
 
 /* ---------------- state ---------------- */
@@ -944,8 +1037,28 @@ function updateUndoButtons(){
 }
 
 /* ---------------- pointer input ---------------- */
+const pointers = new Map();                // активные касания (для пинча)
+let pinch = null;                          // {d0, cx0, cy0, x, y, z}
+
 canvas.addEventListener('pointerdown', e => {
   closePops();
+  pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+
+  if (pointers.size === 2){                // второй палец: жест масштаба/панорамы
+    cur = null;
+    panning = null;
+    document.body.classList.remove('panning');
+    const [a, b] = [...pointers.values()];
+    pinch = {
+      d0: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+      cx0: (a.x + b.x) / 2, cy0: (a.y + b.y) / 2,
+      x: cam.x, y: cam.y, z: cam.z
+    };
+    canvas.setPointerCapture(e.pointerId);
+    return;
+  }
+  if (pointers.size > 2) return;
+
   if (e.button === 1 || spaceHeld || tool === 'hand'){
     panning = { sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y };
     document.body.classList.add('panning');
@@ -972,6 +1085,21 @@ canvas.addEventListener('pointerdown', e => {
 });
 
 canvas.addEventListener('pointermove', e => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+
+  if (pinch && pointers.size >= 2){        // пинч: масштаб вокруг центра жеста
+    const [a, b] = [...pointers.values()];
+    const d = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
+    const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+    const nz = Math.min(5, Math.max(0.2, pinch.z * (d / pinch.d0)));
+    const k = nz / pinch.z;
+    cam.x = cx - (pinch.cx0 - pinch.x) * k;
+    cam.y = cy - (pinch.cy0 - pinch.y) * k;
+    cam.z = nz;
+    updateZoomLabel(); redraw();
+    return;
+  }
+
   if (panning){
     cam.x = panning.cx + (e.clientX - panning.sx);
     cam.y = panning.cy + (e.clientY - panning.sy);
@@ -990,11 +1118,15 @@ canvas.addEventListener('pointermove', e => {
   redraw();
 });
 
-canvas.addEventListener('pointerup', () => {
+canvas.addEventListener('pointerup', e => {
+  pointers.delete(e.pointerId);
+  if (pinch){ if (pointers.size < 2) pinch = null; return; }
   if (panning){ panning = null; document.body.classList.remove('panning'); return; }
   commit(); redraw();
 });
-canvas.addEventListener('pointercancel', () => {
+canvas.addEventListener('pointercancel', e => {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
   panning = null; cur = null;
   document.body.classList.remove('panning');
   redraw();
