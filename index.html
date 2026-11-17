@@ -1039,13 +1039,14 @@ function updateUndoButtons(){
 /* ---------------- pointer input ---------------- */
 const pointers = new Map();                // активные касания (для пинча)
 let pinch = null;                          // {d0, cx0, cy0, x, y, z}
+const capture = id => { try { canvas.setPointerCapture(id); } catch {} };
 
 canvas.addEventListener('pointerdown', e => {
   closePops();
   pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
 
   if (pointers.size === 2){                // второй палец: жест масштаба/панорамы
-    cur = null;
+    commit();                              // начатый мазок сохраняем, а не выбрасываем
     panning = null;
     document.body.classList.remove('panning');
     const [a, b] = [...pointers.values()];
@@ -1054,7 +1055,7 @@ canvas.addEventListener('pointerdown', e => {
       cx0: (a.x + b.x) / 2, cy0: (a.y + b.y) / 2,
       x: cam.x, y: cam.y, z: cam.z
     };
-    canvas.setPointerCapture(e.pointerId);
+    capture(e.pointerId);
     return;
   }
   if (pointers.size > 2) return;
@@ -1062,11 +1063,11 @@ canvas.addEventListener('pointerdown', e => {
   if (e.button === 1 || spaceHeld || tool === 'hand'){
     panning = { sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y };
     document.body.classList.add('panning');
-    canvas.setPointerCapture(e.pointerId);
+    capture(e.pointerId);
     return;
   }
   if (e.button !== 0) return;
-  canvas.setPointerCapture(e.pointerId);
+  capture(e.pointerId);
   const w = toWorld(e.clientX, e.clientY);
   hideHint();
 
@@ -1127,11 +1128,16 @@ canvas.addEventListener('pointerup', e => {
 canvas.addEventListener('pointercancel', e => {
   pointers.delete(e.pointerId);
   if (pointers.size < 2) pinch = null;
-  panning = null; cur = null;
+  panning = null;
+  commit();                                  // браузер прервал жест — сохраняем нарисованное
   document.body.classList.remove('panning');
   redraw();
 });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+/* страховка: «залипшие» касания счищаем на любом pointerup/cancel в документе */
+addEventListener('pointerup',    e => pointers.delete(e.pointerId), true);
+addEventListener('pointercancel', e => pointers.delete(e.pointerId), true);
 
 /* ---------------- zoom ---------------- */
 function zoomAt(sx, sy, factor){
